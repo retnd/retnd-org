@@ -1,0 +1,64 @@
+name: Site
+
+# Publishes docs/site from retnd/retnd to https://retnd.org.
+#
+# The pages are written and checked in docs/site of retnd/retnd, next to the
+# capture tooling and the gates that read them. This repository only serves
+# them: it fetches that directory from the public repository's main branch
+# and deploys it with GitHub Pages. It runs on a schedule (a change to the
+# pages goes live within the hour) and by hand for an immediate redeploy.
+#
+# It has its own repository because the custom-domain certificate on
+# retnd/retnd never issued (retnd/retnd#1501).
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/site.yml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: publish docs/site
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Fetch docs/site from retnd/retnd
+        uses: actions/checkout@v7
+        with:
+          repository: retnd/retnd
+          ref: main
+          sparse-checkout: docs/site
+          sparse-checkout-cone-mode: true
+          path: source
+
+      # Pages runs Jekyll over the upload unless told not to, and Jekyll drops
+      # anything whose path starts with an underscore.
+      - name: Turn Jekyll off
+        run: touch source/docs/site/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload docs/site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: source/docs/site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5

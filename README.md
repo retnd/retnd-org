@@ -1,5 +1,5 @@
 # retnd.org
 
-The static site for [retnd](https://github.com/retnd/retnd), served by GitHub Pages at https://retnd.org.
+Serves the [retnd](https://github.com/retnd/retnd) site at https://retnd.org.
 
-The pages are written and checked in `docs/site` of retnd/retnd and copied here when they change, so edit them there, not here.
+The pages live in `docs/site` of retnd/retnd and are edited and checked there. The workflow here fetches that directory from `main` every hour (or when run by hand) and deploys it with GitHub Pages, so there is nothing to edit in this repository.
